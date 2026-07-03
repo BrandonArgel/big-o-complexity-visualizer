@@ -1,0 +1,19 @@
+:root {
+  color-scheme: dark;
+  --bg-primary: #020617;
+  --bg-radial-a: rgba(34, 211, 238, 0.18);
+  --bg-radial-b: rgba(168, 85, 247, 0.16);
+  --text-primary: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent-cyan: #22d3ee;
+  --accent-cyan-soft: rgba(34, 211, 238, 0.35);
+  --chart-o1: #34d399;
+  --chart-ologn: #22d3ee;
+  --chart-on: #60a5fa;
+  --chart-onlogn: #facc15;
+  --chart-on2: #fb923c;
+  --chart-o2n: #f43f5e;
+  --chart-onfact: #d946ef;
+  --chart-on3: #818cf8;
+  --chart-onsqrt: #84cc16;
+}

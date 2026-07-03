@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Interactive visualization of common Big O time complexities and how they grow with input size."
+    />
+    <title>Big O Complexity Visualizer</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="variables.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="min-h-screen p-6 bg-transparent text-slate-100">
+    <main class="max-w-5xl mx-auto">
+      <header class="mb-8">
+        <h1
+          class="text-3xl font-bold text-cyan-300 mb-2 drop-shadow-[0_0_12px_rgba(34,211,238,0.4)]"
+        >
+          Growth of Complexity: Big O Notation
+        </h1>
+        <p class="text-slate-400">
+          See how the number of operations grows as the size of the input data
+          (N) increases.
+        </p>
+      </header>
+
+      <div
+        class="rounded-2xl border border-cyan-400/20 bg-slate-900/80 p-6 mb-8 shadow-[0_0_40px_rgba(34,211,238,0.12)] backdrop-blur"
+      >
+        <div class="mb-6">
+          <label
+            for="n-slider"
+            class="block text-sm font-medium text-slate-300 mb-2"
+          >
+            Input Size (N):
+            <span id="n-value" class="font-bold text-cyan-400 text-lg">10</span>
+          </label>
+          <input
+            type="range"
+            id="n-slider"
+            min="1"
+            max="100"
+            value="10"
+            class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+          />
+          <p class="text-xs text-slate-500 mt-2">
+            * Move the slider to see the impact on operations. Limited to N=100
+            because exponential complexities would collapse the chart.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+          <!-- Metric Cards -->
+          <div
+            class="rounded-lg border border-emerald-400/30 bg-emerald-500/10 p-4 shadow-[0_0_18px_rgba(16,185,129,0.12)]"
+          >
+            <h3 class="mb-1 text-sm font-semibold text-emerald-300">
+              O(1) - Constant
+            </h3>
+            <p class="text-2xl font-bold text-emerald-100" id="val-o1">1</p>
+          </div>
+          <div
+            class="rounded-lg border border-cyan-400/30 bg-cyan-500/10 p-4 shadow-[0_0_18px_rgba(34,211,238,0.12)]"
+          >
+            <h3 class="mb-1 text-sm font-semibold text-cyan-300">
+              O(log n) - Logarithmic
+            </h3>
+            <p class="text-2xl font-bold text-cyan-100" id="val-ologn">3</p>
+          </div>
+          <div
+            class="rounded-lg border border-blue-400/30 bg-blue-500/10 p-4 shadow-[0_0_18px_rgba(96,165,250,0.12)]"
+          >
+            <h3 class="mb-1 text-sm font-semibold text-blue-300">
+              O(n) - Linear
+            </h3>
+            <p class="text-2xl font-bold text-blue-100" id="val-on">10</p>
+          </div>
+          <div
+            class="rounded-lg border border-amber-400/30 bg-amber-500/10 p-4 shadow-[0_0_18px_rgba(250,204,21,0.12)]"
+          >
+            <h3 class="mb-1 text-sm font-semibold text-amber-300">
+              O(n log n) - Linearithmic
+            </h3>
+            <p class="text-2xl font-bold text-amber-100" id="val-onlogn">33</p>
+          </div>
+          <div
+            class="rounded-lg border border-orange-400/30 bg-orange-500/10 p-4 shadow-[0_0_18px_rgba(249,115,22,0.12)]"
+          >
+            <h3 class="mb-1 text-sm font-semibold text-orange-300">
+              O(n²) - Quadratic
+            </h3>
+            <p class="text-2xl font-bold text-orange-100" id="val-on2">100</p>
+          </div>
+          <div
+            class="relative overflow-hidden rounded-lg border border-indigo-400/30 bg-indigo-500/10 p-4 shadow-[0_0_18px_rgba(129,140,248,0.12)]"
+          >
+            <h3 class="mb-1 text-sm font-semibold text-indigo-300">
+              O(n³) - Cubic
+            </h3>
+            <p class="truncate text-2xl font-bold text-indigo-100" id="val-on3">
+              1,000
+            </p>
+          </div>
+          <div
+            class="relative overflow-hidden rounded-lg border border-rose-400/30 bg-rose-500/10 p-4 shadow-[0_0_18px_rgba(244,63,94,0.12)]"
+          >
+            <h3 class="mb-1 text-sm font-semibold text-rose-300">
+              O(2ⁿ) - Exponential
+            </h3>
+            <p class="truncate text-2xl font-bold text-rose-100" id="val-o2n">
+              1,024
+            </p>
+          </div>
+          <div
+            class="relative overflow-hidden rounded-lg border border-fuchsia-400/30 bg-fuchsia-500/10 p-4 shadow-[0_0_18px_rgba(192,132,252,0.12)]"
+          >
+            <h3 class="mb-1 text-sm font-semibold text-fuchsia-300">
+              O(n!) - Factorial
+            </h3>
+            <p
+              class="truncate text-2xl font-bold text-fuchsia-100"
+              id="val-onfact"
+            >
+              3,628,800
+            </p>
+          </div>
+          <div
+            class="relative overflow-hidden rounded-lg border border-lime-400/30 bg-lime-500/10 p-4 shadow-[0_0_18px_rgba(132,204,22,0.12)]"
+          >
+            <h3 class="mb-1 text-sm font-semibold text-lime-300">
+              O(√n) - Square Root
+            </h3>
+            <p
+              class="truncate text-2xl font-bold text-lime-100"
+              id="val-onsqrt"
+            >
+              3
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="relative h-[400px] w-full rounded-xl border border-cyan-400/20 bg-slate-950/70 p-3"
+        >
+          <canvas
+            id="bigOChart"
+            role="img"
+            aria-label="Line chart comparing the growth of common Big O time complexities"
+          ></canvas>
+        </div>
+      </div>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
