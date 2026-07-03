@@ -225,7 +225,9 @@ const updateChart = (n) => {
             text: "Operations (time)",
             color: "#e2e8f0",
           },
-          ticks: { color: "#cbd5e1" },
+          ticks: {
+            callback: (value) => Math.round(value).toLocaleString(),
+          },
           grid: { color: "rgba(255,255,255,0.08)" },
         },
         x: {
