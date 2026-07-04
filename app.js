@@ -24,6 +24,7 @@ const numberFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 let chart;
+let currentN;
 
 const formatNumber = (num) => {
   if (num > 1000000000) return (num / 1000000000).toFixed(1) + "B";
@@ -49,6 +50,7 @@ const hexToRgba = (hex, alpha = 1) => {
 };
 
 const updateValues = (n) => {
+  currentN = n;
   if (!nValueDisplay) return;
 
   nValueDisplay.textContent = n;
@@ -117,6 +119,18 @@ const generateChartData = (maxN) => {
   return { labels, datasets };
 };
 
+const labelToKey = {
+  "O(1)": "o1",
+  "O(log n)": "ologn",
+  "O(n)": "on",
+  "O(n log n)": "onlogn",
+  "O(n²)": "on2",
+  "O(n³)": "on3",
+  "O(2ⁿ)": "o2n",
+  "O(n!)": "onfact",
+  "O(√n)": "onsqrt",
+};
+
 const updateChart = (n) => {
   const data = generateChartData(n);
   const maxY = Math.pow(n, 2) * 1.1;
@@ -126,7 +140,16 @@ const updateChart = (n) => {
   }
 
   if (chart) {
-    chart.destroy();
+    chart.data.labels = data.labels;
+    chart.data.datasets.forEach((dataset) => {
+      const key = labelToKey[dataset.label];
+      if (key && data.datasets[key]) {
+        dataset.data = data.datasets[key];
+      }
+    });
+    chart.options.scales.y.max = maxY;
+    chart.update();
+    return;
   }
 
   chart = new Chart(chartContext, {
@@ -212,6 +235,10 @@ const updateChart = (n) => {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: {
+        duration: 300,
+        easing: "easeOutQuart",
+      },
       interaction: {
         mode: "index",
         intersect: false,
@@ -258,7 +285,7 @@ const updateChart = (n) => {
               if (context.parsed.y !== null) {
                 if (
                   context.dataset.label === "O(2ⁿ)" &&
-                  context.parsed.y >= n * n * 1.5
+                  context.parsed.y >= currentN * currentN * 1.5
                 ) {
                   label += "> " + formatNumber(context.parsed.y);
                 } else {
