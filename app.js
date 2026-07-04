@@ -20,16 +20,30 @@ const slider = document.getElementById("n-slider");
 const nValueDisplay = document.getElementById("n-value");
 const chartCanvas = document.getElementById("bigOChart");
 const chartContext = chartCanvas?.getContext("2d");
-const numberFormatter = new Intl.NumberFormat("en-US", {
+const compactFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
+const detailedFormatter = new Intl.NumberFormat("en-US", {
+  maximumFractionDigits: 2,
+  minimumFractionDigits: 0,
+});
+
 let chart;
 let currentN;
 
-const formatNumber = (num) => {
-  if (num > 1000000000) return (num / 1000000000).toFixed(1) + "B";
-  if (num > 1000000) return (num / 1000000).toFixed(1) + "M";
-  return numberFormatter.format(num);
+const formatCompactNumber = (num) => {
+  if (num >= 1e15) return num.toExponential(2);
+  if (num >= 1e12) return (num / 1e12).toFixed(1) + "T";
+  if (num >= 1e9) return (num / 1e9).toFixed(1) + "B";
+  if (num >= 1e6) return (num / 1e6).toFixed(1) + "M";
+  return compactFormatter.format(num);
+};
+const formatDetailedNumber = (num) => {
+  if (num >= 1e15) return num.toExponential(2);
+  if (num >= 1e12) return (num / 1e12).toFixed(2) + "T";
+  if (num >= 1e9) return (num / 1e9).toFixed(2) + "B";
+  if (num >= 1e6) return (num / 1e6).toFixed(2) + "M";
+  return detailedFormatter.format(num);
 };
 
 const hexToRgba = (hex, alpha = 1) => {
@@ -57,9 +71,9 @@ const updateValues = (n) => {
 
   const vals = {
     o1: 1,
-    ologn: Math.max(0, Math.ceil(log2(n))),
+    ologn: log2(n),
     on: n,
-    onlogn: Math.max(0, Math.ceil(n * log2(n))),
+    onlogn: n * log2(n),
     on2: Math.pow(n, 2),
     on3: Math.pow(n, 3),
     o2n: Math.pow(2, n),
@@ -67,15 +81,29 @@ const updateValues = (n) => {
     onsqrt: Math.sqrt(n),
   };
 
-  document.getElementById("val-o1").textContent = formatNumber(vals.o1);
-  document.getElementById("val-ologn").textContent = formatNumber(vals.ologn);
-  document.getElementById("val-on").textContent = formatNumber(vals.on);
-  document.getElementById("val-onlogn").textContent = formatNumber(vals.onlogn);
-  document.getElementById("val-on2").textContent = formatNumber(vals.on2);
-  document.getElementById("val-on3").textContent = formatNumber(vals.on3);
-  document.getElementById("val-o2n").textContent = formatNumber(vals.o2n);
-  document.getElementById("val-onfact").textContent = formatNumber(vals.onfact);
-  document.getElementById("val-onsqrt").textContent = formatNumber(vals.onsqrt);
+  document.getElementById("val-o1").textContent = formatCompactNumber(vals.o1);
+  document.getElementById("val-ologn").textContent = formatCompactNumber(
+    vals.ologn,
+  );
+  document.getElementById("val-on").textContent = formatCompactNumber(vals.on);
+  document.getElementById("val-onlogn").textContent = formatCompactNumber(
+    vals.onlogn,
+  );
+  document.getElementById("val-on2").textContent = formatCompactNumber(
+    vals.on2,
+  );
+  document.getElementById("val-on3").textContent = formatCompactNumber(
+    vals.on3,
+  );
+  document.getElementById("val-o2n").textContent = formatCompactNumber(
+    vals.o2n,
+  );
+  document.getElementById("val-onfact").textContent = formatCompactNumber(
+    vals.onfact,
+  );
+  document.getElementById("val-onsqrt").textContent = formatCompactNumber(
+    vals.onsqrt,
+  );
 
   return vals;
 };
@@ -106,13 +134,13 @@ const generateChartData = (maxN) => {
   for (let i = 1; i <= maxN; i++) {
     labels.push(i);
     datasets.o1.push(1);
-    datasets.ologn.push(Math.max(0, Math.ceil(log2(i))));
+    datasets.ologn.push(log2(i));
     datasets.on.push(i);
-    datasets.onlogn.push(Math.max(0, Math.ceil(i * log2(i))));
+    datasets.onlogn.push(i * log2(i));
     datasets.on2.push(Math.pow(i, 2));
     datasets.on3.push(Math.pow(i, 3));
     datasets.o2n.push(Math.min(Math.pow(2, i), maxN * maxN * 1.5));
-    datasets.onfact.push(factorial(i));
+    datasets.onfact.push(Math.min(factorial(i), maxN * maxN * 1.5));
     datasets.onsqrt.push(Math.sqrt(i));
   }
 
@@ -133,7 +161,7 @@ const labelToKey = {
 
 const updateChart = (n) => {
   const data = generateChartData(n);
-  const maxY = Math.pow(n, 2) * 1.1;
+  const maxY = Math.max(10, Math.pow(n, 2) * 1.1);
 
   if (!chartContext) {
     return;
@@ -162,7 +190,6 @@ const updateChart = (n) => {
           data: data.datasets.o1,
           borderColor: colors.o1,
           borderWidth: 3,
-          pointRadius: 0,
           tension: 0.4,
         },
         {
@@ -170,7 +197,6 @@ const updateChart = (n) => {
           data: data.datasets.ologn,
           borderColor: colors.ologn,
           borderWidth: 3,
-          pointRadius: 0,
           tension: 0.4,
         },
         {
@@ -178,7 +204,6 @@ const updateChart = (n) => {
           data: data.datasets.on,
           borderColor: colors.on,
           borderWidth: 3,
-          pointRadius: 0,
           tension: 0.4,
         },
         {
@@ -187,7 +212,6 @@ const updateChart = (n) => {
           borderColor: colors.onlogn,
           borderWidth: 2,
           borderDash: [5, 5],
-          pointRadius: 0,
           tension: 0.4,
         },
         {
@@ -195,7 +219,6 @@ const updateChart = (n) => {
           data: data.datasets.on2,
           borderColor: colors.on2,
           borderWidth: 3,
-          pointRadius: 0,
           tension: 0.4,
         },
         {
@@ -203,7 +226,6 @@ const updateChart = (n) => {
           data: data.datasets.on3,
           borderColor: colors.on3,
           borderWidth: 2,
-          pointRadius: 0,
           tension: 0.4,
         },
         {
@@ -211,7 +233,6 @@ const updateChart = (n) => {
           data: data.datasets.o2n,
           borderColor: colors.o2n,
           borderWidth: 2,
-          pointRadius: 0,
           tension: 0.4,
         },
         {
@@ -219,7 +240,6 @@ const updateChart = (n) => {
           data: data.datasets.onfact,
           borderColor: colors.onfact,
           borderWidth: 2,
-          pointRadius: 0,
           tension: 0.4,
         },
         {
@@ -227,7 +247,6 @@ const updateChart = (n) => {
           data: data.datasets.onsqrt,
           borderColor: colors.onsqrt,
           borderWidth: 2,
-          pointRadius: 0,
           tension: 0.4,
         },
       ],
@@ -235,6 +254,12 @@ const updateChart = (n) => {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      elements: {
+        point: {
+          radius: (context) => (context.chart.data.labels.length === 1 ? 4 : 0),
+          hoverRadius: 5,
+        },
+      },
       animation: {
         duration: 300,
         easing: "easeOutQuart",
@@ -253,6 +278,7 @@ const updateChart = (n) => {
             color: "#e2e8f0",
           },
           ticks: {
+            precision: 0,
             callback: (value) => Math.round(value).toLocaleString(),
           },
           grid: { color: "rgba(255,255,255,0.08)" },
@@ -283,14 +309,17 @@ const updateChart = (n) => {
               let label = context.dataset.label || "";
               if (label) label += ": ";
               if (context.parsed.y !== null) {
-                if (
-                  context.dataset.label === "O(2ⁿ)" &&
-                  context.parsed.y >= currentN * currentN * 1.5
-                ) {
-                  label += "> " + formatNumber(context.parsed.y);
-                } else {
-                  label += formatNumber(context.parsed.y);
+                const x = context.dataIndex + 1;
+                let trueVal = context.parsed.y;
+                const datasetLabel = context.dataset.label;
+                if (datasetLabel === "O(2ⁿ)") {
+                  trueVal = Math.pow(2, x);
+                } else if (datasetLabel === "O(n!)") {
+                  trueVal = factorial(x);
+                } else if (datasetLabel === "O(n³)") {
+                  trueVal = Math.pow(x, 3);
                 }
+                label += formatDetailedNumber(trueVal);
               }
               return label;
             },
